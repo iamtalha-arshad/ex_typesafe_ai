@@ -30,5 +30,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic retries with exponential backoff for transient failures (HTTP 408/429/5xx and transport
   errors), honoring the `Retry-After` header.
 
-[Unreleased]: https://github.com/iamtalha-arshad/ex_typesafe/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/iamtalha-arshad/ex_typesafe/releases/tag/v0.1.0
+[Unreleased]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/iamtalha-arshad/ex_typesafe_ai/releases/tag/v0.1.0
