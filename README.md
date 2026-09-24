@@ -1,18 +1,18 @@
-# ex_typesafe
+# ex_typesafe_ai
 
-Idiomatic Elixir client for the [TypeSafe AI](https://typesafe.ai) API.
+Idiomatic, unofficial Elixir client for the [TypeSafe AI](https://typesafe.ai) API.
 
 > **Unofficial.** This is a community-maintained client and is not affiliated with, sponsored by, or
 > endorsed by TypeSafe AI. "TypeSafe" and related marks belong to their respective owner.
 
 ## Installation
 
-Add `:ex_typesafe` to your dependencies in `mix.exs`:
+Add `:ex_typesafe_ai` to your dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:ex_typesafe, "~> 0.1"}
+    {:ex_typesafe_ai, "~> 0.1"}
   ]
 end
 ```

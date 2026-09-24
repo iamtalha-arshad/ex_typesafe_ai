@@ -6,13 +6,13 @@ defmodule TypeSafe.MixProject do
 
   def project do
     [
-      app: :ex_typesafe,
+      app: :ex_typesafe_ai,
       version: @version,
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       name: "TypeSafe",
-      description: "Elixir SDK for the TypeSafe AI API.",
+      description: "Unofficial, idiomatic Elixir client for the TypeSafe AI API.",
       source_url: @source_url,
       package: package(),
       docs: docs(),
@@ -42,10 +42,9 @@ defmodule TypeSafe.MixProject do
       licenses: ["MIT"],
       links: %{
         "GitHub" => @source_url,
-        "TypeSafe AI" => "https://typesafe.ai",
-        "Documentation" => "https://docs.typesafe.ai/"
+        "TypeSafe AI (upstream API)" => "https://typesafe.ai"
       },
-      files: ~w(lib .formatter.exs mix.exs README* LICENSE*)
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*)
     ]
   end
 
@@ -53,7 +52,7 @@ defmodule TypeSafe.MixProject do
     [
       main: "TypeSafe",
       source_ref: "v#{@version}",
-      extras: ["README.md"],
+      extras: ["README.md", "CHANGELOG.md"],
       groups_for_modules: [
         Questions: [
           TypeSafe.Question,
