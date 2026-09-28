@@ -1,7 +1,7 @@
 defmodule TypeSafe.MixProject do
   use Mix.Project
 
-  @version "0.2.1"
+  @version "0.2.2"
   @source_url "https://github.com/iamtalha-arshad/ex_typesafe_ai"
 
   def project do

@@ -22,6 +22,19 @@ defmodule TypeSafe.ConfigTest do
     assert config.timeout == 10_000
   end
 
+  # The API key must never appear in inspect/Logger output.
+  test "inspect/1 redacts the API key on Config and Client" do
+    secret = "sk-super-secret-abc123"
+
+    config = Config.resolve!(api_key: secret)
+    refute inspect(config, limit: :infinity) =~ secret
+
+    client = TypeSafe.new(api_key: secret)
+    refute inspect(client, limit: :infinity) =~ secret
+    # The struct is still usable — the value is present, just hidden from inspect.
+    assert client.config.api_key == secret
+  end
+
   test "reads values from the environment when no option is given" do
     System.put_env("TYPESAFE_API_KEY", "env-key")
     System.put_env("TYPESAFE_BASE_URL", "https://env.test")

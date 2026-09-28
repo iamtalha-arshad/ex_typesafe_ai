@@ -23,6 +23,9 @@ defmodule TypeSafe.Config do
           headers: %{optional(String.t()) => String.t()}
         }
 
+  # Keep the API key out of inspect/Logger output (Elixir's built-in equivalent of Ecto's
+  # `redact: true`); it is replaced with `...` whenever a config is inspected.
+  @derive {Inspect, except: [:api_key]}
   @enforce_keys [:api_key, :base_url, :default_model, :timeout, :headers]
   defstruct [:api_key, :base_url, :default_model, :timeout, :headers]
 

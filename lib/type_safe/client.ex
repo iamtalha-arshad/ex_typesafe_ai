@@ -12,6 +12,9 @@ defmodule TypeSafe.Client do
 
   alias TypeSafe.Config
 
+  # The bearer token is embedded in the wrapped Req request (`req.options.auth`), so exclude `:req`
+  # from inspect/Logger output. `:config` is still shown and redacts its own `:api_key`.
+  @derive {Inspect, except: [:req]}
   @enforce_keys [:req, :config]
   defstruct [:req, :config]
 
