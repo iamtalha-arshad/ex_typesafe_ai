@@ -24,6 +24,25 @@ defmodule TypeSafe do
   `{:ok, result}` or `{:error, exception}`; the `!` variants (`system_one!/4`, `list_models!/2`)
   return the result or raise. See `TypeSafe.Error` for the exception structs.
 
+  ## Application-level clients
+
+  Instead of threading a client value through your code, you can start one under your supervision
+  tree and refer to it by name:
+
+      children = [
+        {TypeSafe, name: MyApp.TypeSafe, api_key: System.fetch_env!("TYPESAFE_API_KEY")}
+      ]
+
+      Supervisor.start_link(children, strategy: :one_for_one)
+
+  Then pass the name anywhere a client is accepted:
+
+      TypeSafe.system_one(MyApp.TypeSafe, state, questions)
+
+  The client is built once at startup (a bad key or option fails the boot loudly) and read
+  lock-free on every call. `TypeSafe.client/1` returns the underlying `TypeSafe.Client` if you need
+  the value itself.
+
   ## Questions and answers
 
   Build questions with `TypeSafe.Question.noul/1`, `TypeSafe.Question.choice/1`, and
@@ -37,10 +56,13 @@ defmodule TypeSafe do
   @system_one_path "/v1/systemone"
   @models_path "/v1/models"
 
-  alias TypeSafe.{Client, HTTP, Question, Response}
+  alias TypeSafe.{Client, HTTP, Question, Response, Server}
 
   @typedoc "State to evaluate: text, a JSON object (map), or a JSON array (list)."
   @type state :: String.t() | map() | list()
+
+  @typedoc "A built client value, or the atom name of one started under a supervision tree."
+  @type client :: Client.t() | atom()
 
   @doc """
   Build a `TypeSafe.Client`.
@@ -63,6 +85,45 @@ defmodule TypeSafe do
   """
   @spec new(keyword()) :: Client.t()
   def new(opts \\ []), do: Client.new(opts)
+
+  @doc """
+  Child spec for starting an application-level client under a supervision tree.
+
+  Requires a `:name` (a non-nil atom); the remaining options are the same as `new/1`. The child is
+  keyed by its name, so several named clients can live under one supervisor. Referenced implicitly
+  when you place `{TypeSafe, opts}` in a supervisor's child list.
+  """
+  @spec child_spec(keyword()) :: Supervisor.child_spec()
+  def child_spec(opts), do: Server.child_spec(opts)
+
+  @doc """
+  Start an application-level client and register it under `opts[:name]`.
+
+  Usually invoked for you via `{TypeSafe, opts}` in a supervision tree rather than called directly.
+  Raises `ArgumentError` when `:name` is missing and `TypeSafe.ConfigError` on invalid configuration.
+  """
+  @spec start_link(keyword()) :: GenServer.on_start()
+  def start_link(opts), do: Server.start_link(opts)
+
+  @doc """
+  Return the `TypeSafe.Client` registered under `name`.
+
+  Raises `TypeSafe.ConfigError` if no client is registered — usually because `{TypeSafe, name: name}`
+  is not in the supervision tree, or has not started yet.
+  """
+  @spec client(atom()) :: Client.t()
+  def client(name) when is_atom(name) do
+    case Server.fetch(name) do
+      {:ok, client} ->
+        client
+
+      :error ->
+        raise TypeSafe.ConfigError,
+          message:
+            "No TypeSafe client is registered under #{inspect(name)}. " <>
+              "Add {TypeSafe, name: #{inspect(name)}, api_key: ...} to your supervision tree."
+    end
+  end
 
   @doc """
   Answer named `questions` about `state`.
@@ -96,9 +157,11 @@ defmodule TypeSafe do
       response.nouls["billing"].noul     #=> 0.98
       response.choices["tone"].choice    #=> "angry"
   """
-  @spec system_one(Client.t(), state(), map(), keyword()) ::
+  @spec system_one(client(), state(), map(), keyword()) ::
           {:ok, Response.SystemOne.t()} | {:error, TypeSafe.Error.t()}
-  def system_one(%Client{} = client, state, questions, opts \\ []) when is_map(questions) do
+  def system_one(client, state, questions, opts \\ []) when is_map(questions) do
+    client = resolve(client)
+
     with {:ok, questions} <- Question.normalize(questions) do
       body =
         %{
@@ -114,7 +177,7 @@ defmodule TypeSafe do
   end
 
   @doc "Like `system_one/4`, but returns the response or raises the exception."
-  @spec system_one!(Client.t(), state(), map(), keyword()) :: Response.SystemOne.t()
+  @spec system_one!(client(), state(), map(), keyword()) :: Response.SystemOne.t()
   def system_one!(client, state, questions, opts \\ []) do
     unwrap!(system_one(client, state, questions, opts))
   end
@@ -129,15 +192,16 @@ defmodule TypeSafe do
 
   Returns `{:ok, %TypeSafe.Response.ListModels{}}` or `{:error, exception}`.
   """
-  @spec list_models(Client.t(), keyword()) ::
+  @spec list_models(client(), keyword()) ::
           {:ok, Response.ListModels.t()} | {:error, TypeSafe.Error.t()}
-  def list_models(%Client{} = client, opts \\ []) do
+  def list_models(client, opts \\ []) do
+    client = resolve(client)
     req_opts = [] |> put_headers(opts[:headers]) |> put_timeout(opts[:timeout])
     HTTP.request(client, :get, @models_path, req_opts, &Response.parse_list_models/2)
   end
 
   @doc "Like `list_models/2`, but returns the response or raises the exception."
-  @spec list_models!(Client.t(), keyword()) :: Response.ListModels.t()
+  @spec list_models!(client(), keyword()) :: Response.ListModels.t()
   def list_models!(client, opts \\ []), do: unwrap!(list_models(client, opts))
 
   @doc "The SDK version string."
@@ -146,6 +210,9 @@ defmodule TypeSafe do
 
   @doc false
   def sdk_name, do: @sdk_name
+
+  defp resolve(%Client{} = client), do: client
+  defp resolve(name) when is_atom(name), do: client(name)
 
   defp merge_extra_body(body, nil), do: body
   defp merge_extra_body(body, extra) when is_map(extra), do: Map.merge(body, extra)

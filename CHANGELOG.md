@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-29
+
+### Added
+
+- Application-level, named clients. Add `{TypeSafe, name: MyApp.TypeSafe, api_key: ...}` to a
+  supervision tree and refer to it by name in `TypeSafe.system_one/4` and
+  `TypeSafe.list_models/2`. The client is built once at startup and read lock-free (no process on the
+  request path). `TypeSafe.client/1` returns the underlying `TypeSafe.Client`.
+
 ## [0.1.0] - 2026-09-24
 
 ### Added
@@ -30,5 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic retries with exponential backoff for transient failures (HTTP 408/429/5xx and transport
   errors), honoring the `Retry-After` header.
 
-[Unreleased]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/iamtalha-arshad/ex_typesafe_ai/releases/tag/v0.1.0

@@ -1,5 +1,11 @@
 # ex_typesafe_ai
 
+[![hex](https://img.shields.io/hexpm/v/ex_typesafe_ai.svg?label=hex)](https://hex.pm/packages/ex_typesafe_ai)
+[![downloads](https://img.shields.io/hexpm/dt/ex_typesafe_ai.svg?label=downloads)](https://hex.pm/packages/ex_typesafe_ai)
+[![license](https://img.shields.io/hexpm/l/ex_typesafe_ai.svg?label=license)](https://github.com/iamtalha-arshad/ex_typesafe_ai/blob/main/LICENSE)
+[![hexdocs](https://img.shields.io/badge/hexdocs-release-a3d977.svg)](https://hexdocs.pm/ex_typesafe_ai/)
+[![last commit](https://img.shields.io/github/last-commit/iamtalha-arshad/ex_typesafe_ai.svg?label=last%20commit)](https://github.com/iamtalha-arshad/ex_typesafe_ai/commits/main)
+
 Idiomatic, unofficial Elixir client for the [TypeSafe AI](https://typesafe.ai) API.
 
 > **Unofficial.** This is a community-maintained client and is not affiliated with, sponsored by, or
@@ -59,6 +65,31 @@ client =
     max_retries: 2                                   # retries after the first attempt
   )
 ```
+
+### Application-level clients
+
+Rather than passing a client value around, you can start one under your supervision tree and refer
+to it by name:
+
+```elixir
+children = [
+  {TypeSafe, name: MyApp.TypeSafe, api_key: System.fetch_env!("TYPESAFE_API_KEY")}
+]
+
+Supervisor.start_link(children, strategy: :one_for_one)
+```
+
+Then pass the name wherever a client is accepted:
+
+```elixir
+TypeSafe.system_one(MyApp.TypeSafe, state, questions)
+TypeSafe.list_models(MyApp.TypeSafe)
+```
+
+`{TypeSafe, opts}` takes the same options as `TypeSafe.new/1` plus a required `:name` (an atom). The
+client is built once at startup — a missing key or bad option fails the boot loudly — and read
+lock-free on every call, so no request is serialized through a process. Use `TypeSafe.client/1` to
+get the underlying `TypeSafe.Client` value if you need it.
 
 ### Questions
 
