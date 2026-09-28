@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-29
+
+### Changed
+
+- Docs only: add README badges and bump the install requirement to `~> 0.2`. No code changes.
+
 ## [0.2.0] - 2026-09-29
 
 ### Added
@@ -39,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic retries with exponential backoff for transient failures (HTTP 408/429/5xx and transport
   errors), honoring the `Retry-After` header.
 
-[Unreleased]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/iamtalha-arshad/ex_typesafe_ai/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/iamtalha-arshad/ex_typesafe_ai/releases/tag/v0.1.0
