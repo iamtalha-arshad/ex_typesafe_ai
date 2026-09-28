@@ -18,7 +18,7 @@ Add `:ex_typesafe_ai` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_typesafe_ai, "~> 0.1"}
+    {:ex_typesafe_ai, "~> 0.2"}
   ]
 end
 ```
